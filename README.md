@@ -15,10 +15,13 @@ However, as the user continues interacting with the system, layouts and structur
 The project aims to create the feeling of “a user trying to build order while the system slowly grows out of control.” Visually, we are inspired by Yayoi Kusama and some glitch art games(e.g. Pony Island). 
 
 >Yayoi Kusama, RED-NETS
-<img src="assets/reedme/ksmyyi.jpg" width="500">
+<img src="assets/readme/ksmyyi.jpg" width="500">
+
+>Yayoi Kusama, Obliteration Room
+<img src="assets/readme/ksmyyi2.jpg" width="600">
 
 >Pony Island
-<img src="assets/reedme/pony_island.jpg" width="600">
+<img src="assets/readme/pony_island.jpg" width="600">
 
 ---
 
@@ -86,4 +89,4 @@ The four mechanics work together as a single interactive system. The input mecha
 Visually, the project is unified through the contrast between clean UI structures and uncontrolled organic distortion. Conceptually, all mechanics support the idea of a digital system gradually developing autonomous behaviour and escaping user control.
 
 >Our draft for the system
-<img src="assets/reedme/draft.jpg" width="500">
+<img src="assets/readme/draft.jpg" width="500">
