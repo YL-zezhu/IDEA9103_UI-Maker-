@@ -1,8 +1,20 @@
-let currentStage = 1;   
-let elapsedMs = 0;      
+let timeState = {
+  currentStage: 1,       
+  corruption: 0,         
+  elapsedMs: 0,          
+  glitchesEnabled: false
+};
+
+let corruption = 0;     
 let placedComponents = [];
 
 const STAGE_DURATION_MS = 60000; 
+const STAGE_FLOOR_MS    = 35000; 
+const MAX_SPEED = STAGE_DURATION_MS / STAGE_FLOOR_MS; 
+const COMPONENT_THRESHOLD = 6; //start speed up count
+const SPEED_PER_COMPONENT = 0.07; 
+
+let virtualElapsedMs = 0;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -10,28 +22,56 @@ function setup() {
 }
 
 function draw() {
-  background(220);
+  background(250);
   updateTime();
 
   for (let c of placedComponents) {
-    push();
-    rectMode(CORNER);
-    noStroke(); fill(245);
-    rect(c.x, c.y, c.w, c.h, 8);
-    noFill(); stroke(200);
-    rect(c.x, c.y, c.w, c.h, 8);
-    noStroke(); fill(60);
-    textAlign(LEFT, CENTER); textSize(18);
-    text(c.text, c.x + 16, c.y + c.h / 2);
-    pop();
+    if (timeState.glitchesEnabled && typeof glitchComponent === 'function') {
+      glitchComponent(c);   
+    } else {
+      drawComponentClean(c); 
+    }
   }
 
   drawDebugHUD();
 }
 
 function updateTime() {
-  elapsedMs = millis(); 
-  currentStage = constrain(floor(elapsedMs / STAGE_DURATION_MS) + 1, 1, 4);
+  let extra = max(0, placedComponents.length - COMPONENT_THRESHOLD);
+  let speed = constrain(1 + extra * SPEED_PER_COMPONENT, 1, MAX_SPEED);
+
+  virtualElapsedMs += deltaTime * speed;
+
+  let stage = constrain(floor(virtualElapsedMs / STAGE_DURATION_MS) + 1, 1, 4);
+
+  let corr = constrain(
+    map(virtualElapsedMs, STAGE_DURATION_MS * 2, STAGE_DURATION_MS * 4, 0, 1),
+    0, 1
+  );
+
+  timeState.currentStage    = stage;
+  timeState.elapsedMs       = round(virtualElapsedMs);
+  timeState.corruption      = corr;
+  timeState.glitchesEnabled = (stage >= 3);
+
+  corruption = timeState.corruption;
+}
+
+function drawComponentClean(c) {
+  push();
+  rectMode(CORNER);
+  noStroke();
+  fill(245);
+  rect(c.x, c.y, c.w, c.h, 8);
+  noFill();
+  stroke(200);
+  rect(c.x, c.y, c.w, c.h, 8);
+  noStroke();
+  fill(60);
+  textAlign(LEFT, CENTER);
+  textSize(18);
+  text(c.text, c.x + 16, c.y + c.h / 2);
+  pop();
 }
 
 function drawDebugHUD() {
@@ -39,10 +79,18 @@ function drawDebugHUD() {
   noStroke(); fill(0, 180);
   rect(0, 0, 230, 72);
   fill(255); textAlign(LEFT, TOP); textSize(14);
-  text('Stage: ' + currentStage, 12, 10);
-  text('Time: ' + (elapsedMs / 1000).toFixed(1) + ' s', 12, 32);
+  text('Stage: ' + timeState.currentStage, 12, 10);
+  text('Time: ' + (timeState.elapsedMs / 1000).toFixed(1) + ' s', 12, 32);
+  text('corruption: ' + timeState.corruption.toFixed(2), 12, 54);
   text('Components: ' + placedComponents.length, 12, 52);
   pop();
+}
+
+function keyPressed() {
+  if (key === '1') virtualElapsedMs = STAGE_DURATION_MS * 0;
+  if (key === '2') virtualElapsedMs = STAGE_DURATION_MS * 1;
+  if (key === '3') virtualElapsedMs = STAGE_DURATION_MS * 2;
+  if (key === '4') virtualElapsedMs = STAGE_DURATION_MS * 3;
 }
 
 function windowResized() {
