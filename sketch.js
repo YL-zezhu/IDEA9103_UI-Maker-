@@ -1,12 +1,10 @@
-// timebase
+// timer
 let timeState = {
   currentStage: 1,       
   corruption: 0,         
   elapsedMs: 0,          
   glitchesEnabled: false
 };
-     
-let placedComponents = [];
 
 const STAGE_DURATION_MS = 60000; 
 const STAGE_FLOOR_MS    = 35000; 
@@ -94,18 +92,19 @@ let smoothBass = 0, smoothMid = 0, smoothTreble = 0;
 let playButton;
 let currentSongIndex = 0;
 let songSettings = [
-  { bassMin: 200, midMin: 30, trebleMin: 0, bassMax: 255, midMax: 80, trebleMax: 255, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 0.2},
-  { bassMin: 150, midMin: 110, trebleMin: 25, bassMax: 255, midMax: 170, trebleMax: 60, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
   { bassMin: 150, midMin: 75, trebleMin: 50, bassMax: 240, midMax: 170, trebleMax: 150, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
+  { bassMin: 150, midMin: 110, trebleMin: 25, bassMax: 255, midMax: 170, trebleMax: 60, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
+  { bassMin: 200, midMin: 30, trebleMin: 0, bassMax: 255, midMax: 80, trebleMax: 255, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 0.2},
   { bassMin: 210, midMin: 120, trebleMin: 100, bassMax: 255, midMax: 230, trebleMax: 160, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
 ];
 
 let currentSettings = songSettings[0];
+let bgmStarted = false;
 
 function preload() {
-  song[0] = loadSound("Assets/songs/Brian Eno - Music for Airports.mp3");
+  song[0] = loadSound("Assets/songs/塞壬唱片-MSR,Elvin Shen - Visage.mp3");
   song[1] = loadSound("Assets/songs/The Caretaker - We don't have many days.mp3");
-  song[2] = loadSound("Assets/songs/塞壬唱片-MSR,Elvin Shen - Visage.mp3");
+  song[2] = loadSound("Assets/songs/Brian Eno - Music for Airports.mp3");
   song[3] = loadSound("Assets/songs/Victor Borba - Bury the Light.mp3");
 }
 
@@ -172,7 +171,6 @@ function draw() {
   drawInterface();
   drawTraces();
   checkOverload();
-  drawPlacedComponents();
   drawPaletteComponents();
   drawDraggingComponent();
   
@@ -535,6 +533,7 @@ function drawTraces() {
 }
 
 function mousePressed() {
+  startBGMOnFirstInteraction();
   if (
     mouseX > bgmX &&
     mouseX < bgmX + bgmW &&
@@ -799,8 +798,8 @@ function computeAllShakes() {
   let bassShake = dongcidaci * 10 * corruption;
   
   for (let comp of placedComponents) {
-    comp.shakeX = random(-bassShake, bassShake);
-    comp.shakeY = random(-bassShake, bassShake);
+    comp._shakeX = (comp._shakeX || 0) + random(-bassShake, bassShake);
+    comp._shakeY = (comp._shakeY || 0) + random(-bassShake, bassShake);
   }
 }
 
@@ -848,4 +847,13 @@ function keyPressed() {
   if (key === '2') virtualElapsedMs = STAGE_DURATION_MS * 1;
   if (key === '3') virtualElapsedMs = STAGE_DURATION_MS * 2;
   if (key === '4') virtualElapsedMs = STAGE_DURATION_MS * 3;
+}
+
+function startBGMOnFirstInteraction() {
+  if (bgmStarted) return;
+  if (!song[currentSongIndex] || !song[currentSongIndex].isLoaded()) return;
+  
+  song[currentSongIndex].loop();
+  playButton.html('Pause');
+  bgmStarted = true;
 }
