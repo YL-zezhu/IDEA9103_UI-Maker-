@@ -1,8 +1,180 @@
-html, body {
-  margin: 0;
-  padding: 0;
+/* ============================================================
+   style.css — Corruption Sketch
+   All visual rules live here. sketch.js and index.html are
+   style-free. Teammates: add new component styles at the
+   bottom, inside clearly labelled sections.
+   ============================================================ */
+
+
+/* ════════════════════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES  (design tokens)
+   Change colours, fonts, and spacing in one place.
+   ════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Palette */
+  --color-canvas-bg:        #1a1a1a;   /* page background behind the p5 canvas */
+  --color-panel-bg:         #1e1010;   /* control-panel background              */
+  --color-panel-border:     #4a1a1a;   /* panel outer border                    */
+  --color-button-bg:        #2a1010;   /* button resting state                  */
+  --color-button-bg-hover:  #501818;   /* button hover state                    */
+  --color-button-border:    #662222;   /* button border                         */
+  --color-button-text:      #cc4444;   /* button label colour                   */
+  --color-select-bg:        #2a1010;   /* <select> background                   */
+  --color-select-text:      #cc4444;   /* <select> text                         */
+
+  /* Typography */
+  --font-ui:   'Courier New', Courier, monospace;
+  --font-size-ui:  12px;
+
+  /* Spacing */
+  --gap-controls:    10px;   /* gap between control items */
+  --padding-panel:   10px 16px;
+  --padding-button:  6px 14px;
+
+  /* Shape */
+  --border-radius-ui:  3px;
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   RESET & BASE
+   ════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  margin:     0;
+  padding:    0;
+  box-sizing: border-box;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   PAGE LAYOUT
+   Stacks the control panel above the p5.js canvas, both
+   centred horizontally.
+   ════════════════════════════════════════════════════════════ */
+
+body {
+  background:      var(--color-canvas-bg);
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  justify-content: center;
+  min-height:      100vh;
+  gap:             14px;
+  font-family:     var(--font-ui);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   p5.js CANVAS
+   p5 injects a <canvas> element directly into <body>.
+   This rule makes it display as a block (removes the inline
+   baseline gap that causes a thin strip below the canvas).
+   ════════════════════════════════════════════════════════════ */
 
 canvas {
   display: block;
 }
+
+
+/* ════════════════════════════════════════════════════════════
+   CONTROL PANEL  (#controls)
+   Flexbox row that wraps on narrow screens.
+   ════════════════════════════════════════════════════════════ */
+
+#controls {
+  display:         flex;
+  flex-wrap:       wrap;
+  align-items:     center;
+  gap:             var(--gap-controls);
+  padding:         var(--padding-panel);
+  background:      var(--color-panel-bg);
+  border:          1px solid var(--color-panel-border);
+  border-radius:   var(--border-radius-ui);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   BUTTONS
+   ════════════════════════════════════════════════════════════ */
+
+#controls button {
+  background:    var(--color-button-bg);
+  color:         var(--color-button-text);
+  border:        1px solid var(--color-button-border);
+  padding:       var(--padding-button);
+  font-family:   var(--font-ui);
+  font-size:     var(--font-size-ui);
+  cursor:        pointer;
+  border-radius: var(--border-radius-ui);
+
+  /* Smooth hover transition */
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#controls button:hover {
+  background:   var(--color-button-bg-hover);
+  border-color: var(--color-button-text);
+}
+
+#controls button:active {
+  opacity: 0.75;
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   SELECT MENUS
+   ════════════════════════════════════════════════════════════ */
+
+#controls select {
+  background:    var(--color-select-bg);
+  color:         var(--color-select-text);
+  border:        1px solid var(--color-button-border);
+  padding:       var(--padding-button);
+  font-family:   var(--font-ui);
+  font-size:     var(--font-size-ui);
+  border-radius: var(--border-radius-ui);
+  cursor:        pointer;
+
+  /* Remove default OS arrow on some browsers */
+  appearance:    none;
+  -webkit-appearance: none;
+
+  /* Custom dropdown arrow using a CSS background SVG */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23cc4444'/%3E%3C/svg%3E");
+  background-repeat:   no-repeat;
+  background-position: right 10px center;
+  padding-right:       28px;
+}
+
+#controls select:hover {
+  border-color: var(--color-button-text);
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   TEAMMATES: add new UI component styles below this line.
+   Use the CSS variables defined at the top so your new
+   components automatically match the existing palette.
+
+   Example — a future slider:
+
+   #intensitySlider {
+     accent-color: var(--color-button-text);
+     width: 120px;
+   }
+
+   Example — a future status badge:
+
+   .status-badge {
+     font-family:   var(--font-ui);
+     font-size:     var(--font-size-ui);
+     color:         var(--color-button-text);
+     border:        1px solid var(--color-button-border);
+     padding:       3px 8px;
+     border-radius: var(--border-radius-ui);
+   }
+   ════════════════════════════════════════════════════════════ */

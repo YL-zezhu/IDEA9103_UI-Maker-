@@ -2,17 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sketch</title>
 
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="style.css" />
 
     <script src="libraries/p5.min.js"></script>
     <script src="libraries/p5.sound.min.js"></script>
   </head>
 
   <body>
+    <div id="controls">
+      <select id="regionSelect">
+        <option value="0">Region 0</option>
+        <option value="1">Region 1</option>
+        <option value="2">Region 2</option>
+      </select>
+      <button id="btnDiffusion">→ Diffusion</button>
+      <button id="btnTendrils">→ Tendrils</button>
+      <button id="btnRemoveRegion">Remove region</button>
+      <button id="btnAddRegion">+ Add region</button>
+    </div>
+
     <script src="sketch.js"></script>
   </body>
 </html>
