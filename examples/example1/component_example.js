@@ -45,19 +45,25 @@ let bgmOptions = [
 
 let selectedBgmIndex = 0;
 
-function setupUserInputUI() {
+
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
   createInterfaceSegments();
   createPaletteComponents();
 }
 
-function drawUserInputUI(audioState) {
+
+
+function draw() {
+  background(245);
+
   drawInterface();
 
   drawTraces();
 
   checkOverload();
-
-  drawPlacedComponents(audioState);
+  drawPlacedComponents();
 
   drawPaletteComponents();
 
@@ -70,6 +76,8 @@ function drawUserInputUI(audioState) {
     );
   }
 }
+
+
 
 function createInterfaceSegments() {
   let roughnessLarge = 0.8;
@@ -148,6 +156,8 @@ function createInterfaceSegments() {
     1
   );
 }
+
+
 
 function createPaletteComponents() {
   paletteComponents = [];
@@ -242,34 +252,23 @@ function createPaletteComponents() {
   );
 }
 
+
+
 function drawPaletteComponents() {
   for (let component of paletteComponents) {
     component.display();
   }
 }
 
-function drawPlacedComponents(audioState) {
-  let shakeAmount = 0;
 
-  if (audioState != null) {
-    shakeAmount = map(
-      audioState.treble,
-      0,
-      255,
-      0,
-      4
-    );
 
-    shakeAmount += audioState.corruption * 0.4;
-  }
-
+function drawPlacedComponents() {
   for (let component of placedComponents) {
-    drawComponentWithShake(
-      component,
-      shakeAmount
-    );
+    component.display();
   }
 }
+
+
 
 function drawDraggingComponent() {
   if (draggingComponent != null) {
@@ -284,6 +283,8 @@ function drawDraggingComponent() {
     draggingComponent.display();
   }
 }
+
+
 
 function drawInterface() {
   noStroke();
@@ -359,7 +360,9 @@ function drawInterface() {
   drawSketchCircle(trashX, trashY, trashR, 2, 20);
 }
 
-function userInputMousePressed() {
+
+
+function mousePressed() {
   if (
     mouseX > bgmX &&
     mouseX < bgmX + bgmW &&
@@ -379,11 +382,6 @@ function userInputMousePressed() {
 
     if (clickedOption >= 0) {
       selectedBgmIndex = clickedOption;
-
-      if (typeof switchBGM === "function") {
-        switchBGM(clickedOption);
-      }
-
       bgmDropdownOpen = false;
       return;
     }
@@ -421,7 +419,9 @@ function userInputMousePressed() {
   }
 }
 
-function userInputMouseReleased() {
+
+
+function mouseReleased() {
   if (draggingComponent != null) {
     if (isInsideWorkspace(mouseX, mouseY)) {
       placedComponents.push(draggingComponent);
@@ -430,6 +430,8 @@ function userInputMouseReleased() {
     draggingComponent = null;
   }
 }
+
+
 
 function getWorkspaceComponentSize(type) {
   if (type == "backgroundImage") {
@@ -474,6 +476,8 @@ function getWorkspaceComponentSize(type) {
   };
 }
 
+
+
 function checkOverload() {
   if (placedComponents.length > 10 && !systemOverloaded) {
     systemOverloaded = true;
@@ -505,6 +509,8 @@ function checkOverload() {
   }
 }
 
+
+
 function fakeRefresh() {
   refreshCount++;
 
@@ -519,6 +525,8 @@ function fakeRefresh() {
   systemOverloaded = false;
   flyingComponentIndex = -1;
 }
+
+
 
 function copyComponentAsTrace(component) {
   let copiedSegments = [];
@@ -541,6 +549,8 @@ function copyComponentAsTrace(component) {
     segments: copiedSegments
   };
 }
+
+
 
 function drawTraces() {
   for (let trace of traces) {
@@ -565,7 +575,55 @@ function drawTraces() {
   }
 }
 
-function resizeUserInputUI() {
+
+
+function moveComponent(component, dx, dy) {
+  component.x += dx;
+  component.y += dy;
+
+  for (let seg of component.segments) {
+    seg.x1 += dx;
+    seg.y1 += dy;
+    seg.x2 += dx;
+    seg.y2 += dy;
+  }
+}
+
+
+
+function isInsideComponent(px, py, component) {
+  return (
+    px > component.x &&
+    px < component.x + component.w &&
+    py > component.y &&
+    py < component.y + component.h
+  );
+}
+
+
+
+function isInsideWorkspace(px, py) {
+  return (
+    px > workspaceX &&
+    px < workspaceX + workspaceW &&
+    py > workspaceY &&
+    py < workspaceY + workspaceH
+  );
+}
+
+
+
+function isInsideCircle(px, py, cx, cy, r) {
+  let dx = px - cx;
+  let dy = py - cy;
+
+  return dx * dx + dy * dy < r * r;
+}
+
+
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
   createInterfaceSegments();
   createPaletteComponents();
 }

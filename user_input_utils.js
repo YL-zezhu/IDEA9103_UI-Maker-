@@ -6,14 +6,17 @@ function createSegmentLine(
   segmentLength,
   roughness
 ) {
+
   let result = [];
 
   if (y1 == y2) {
+
     for (
       let x = x1;
       x < x2;
       x += segmentLength
     ) {
+
       result.push({
         x1: x + random(-roughness, roughness),
         y1: y1 + random(-roughness, roughness),
@@ -23,13 +26,17 @@ function createSegmentLine(
 
         y2: y1 + random(-roughness, roughness)
       });
+
     }
+
   } else if (x1 == x2) {
+
     for (
       let y = y1;
       y < y2;
       y += segmentLength
     ) {
+
       result.push({
         x1: x1 + random(-roughness, roughness),
 
@@ -40,11 +47,15 @@ function createSegmentLine(
         y2: min(y + segmentLength, y2)
           + random(-roughness, roughness)
       });
+
     }
+
   }
 
   return result;
 }
+
+
 
 function createSketchRect(
   x,
@@ -54,6 +65,7 @@ function createSketchRect(
   segmentLength,
   roughness
 ) {
+
   let result = [];
 
   let top = createSegmentLine(
@@ -100,12 +112,12 @@ function createSketchRect(
   return result;
 }
 
-function drawSketchCircle(cx, cy, r, roughness, seed) {
+function drawSketchCircle(cx, cy, r, roughness) {
   noFill();
   beginShape();
 
   for (let angle = 0; angle < TWO_PI; angle += 0.25) {
-    let offset = noise(seed + angle * 2) * roughness * 2 - roughness;
+    let offset = noise(angle * 2) * roughness * 2 - roughness;
     let offsetR = r + offset;
 
     let x = cx + cos(angle) * offsetR;
@@ -118,30 +130,21 @@ function drawSketchCircle(cx, cy, r, roughness, seed) {
 }
 
 function drawSegments(segments) {
+
   stroke(30);
   strokeWeight(4);
 
   for (let seg of segments) {
+
     line(
       seg.x1,
       seg.y1,
       seg.x2,
       seg.y2
     );
+
   }
-}
 
-function drawComponentWithShake(component, shakeAmount) {
-  push();
-
-  translate(
-    random(-shakeAmount, shakeAmount),
-    random(-shakeAmount, shakeAmount)
-  );
-
-  component.display();
-
-  pop();
 }
 
 function createBgmDropdown(
@@ -191,6 +194,7 @@ function createBgmDropdown(
   return dropdown;
 }
 
+
 function drawBgmDropdown(dropdown, selectedIndex) {
   noStroke();
   fill(245);
@@ -231,6 +235,7 @@ function drawBgmDropdown(dropdown, selectedIndex) {
   }
 }
 
+
 function getBgmOptionIndex(px, py, dropdown) {
   if (
     px > dropdown.x &&
@@ -245,7 +250,7 @@ function getBgmOptionIndex(px, py, dropdown) {
 }
 
 class Component {
-  constructor(x, y, w, h, type) {
+  constructor(x, y, w, h, type, textContent = null) {
     this.x = x;
     this.y = y;
     this.w = w;
@@ -264,10 +269,26 @@ class Component {
       this.segmentLength,
       this.roughness
     );
+
+    if (type === "title") {
+      this.textContent = textContent || getNextTitle();
+      this.textSizeValue = h * 0.7;
+    } else if (type === "text") {
+      this.textContent = textContent || getNextText();
+      this.textSizeValue = h * 0.3;
+    }
+    
   }
 
-  display() {
+  display(isPlaced = false) {
+    push();
+
+    if (isPlaced && this.shakeX !== undefined) {
+      translate(this.shakeX, this.shakeY);
+    }
+
     if (this.type == "image") {
+
       drawSegments(this.segments);
 
       noStroke();
@@ -281,9 +302,11 @@ class Component {
         this.x + this.w / 2,
         this.y + this.h / 2
       );
+
     }
 
     else if (this.type == "backgroundImage") {
+
       drawSegments(this.segments);
 
       noStroke();
@@ -297,9 +320,11 @@ class Component {
         this.x + this.w / 2,
         this.y + this.h / 2
       );
+
     }
 
     else if (this.type == "search") {
+
       drawSegments(this.segments);
 
       stroke(30);
@@ -320,41 +345,50 @@ class Component {
         this.x + this.h * 0.62,
         this.y + this.h * 0.77
       );
+
     }
 
     else if (this.type == "title") {
-      stroke(2);
-      fill(30);
+      if (!isPlaced) {
+        push();
+        noStroke();
+        fill(30);
+        textStyle(BOLD);
 
-      textAlign(LEFT, CENTER);
+        textAlign(LEFT, TOP);
 
-      textSize(this.h * 0.7);
+        textSize(this.textSizeValue);
 
-      text(
-        "TITLE",
-        this.x,
-        this.y + this.h / 2
-      );
+        text(
+          this.textContent,
+          this.x,
+          this.y + this.h / 2
+        );
+        pop();
+      }
     }
 
     else if (this.type == "text") {
-      noStroke();
-      fill(30);
+      if (!isPlaced) {
+        noStroke();
+        fill(30);
 
-      textAlign(LEFT, TOP);
+        textAlign(LEFT, TOP);
 
-      textSize(this.h * 0.3);
+        textSize(this.textSizeValue);
 
-      text(
-        "This text is only for testing\nthe function of this\ncomponent.",
-        this.x,
-        this.y
-      );
+        text(
+          this.textContent,
+          this.x,
+          this.y,
+        );
+      }
     }
 
     else if (this.type == "card") {
       drawSegments(this.segments);
 
+      // image placeholder inside card
       let imgX = this.x + this.w * 0.1;
       let imgY = this.y + this.h * 0.08;
       let imgW = this.w * 0.6;
@@ -365,6 +399,7 @@ class Component {
       strokeWeight(2);
       rect(imgX, imgY, imgW, imgH);
 
+      // three-dot menu
       noStroke();
       fill(20);
 
@@ -398,42 +433,6 @@ class Component {
         this.y + this.h * 0.65
       );
     }
+    pop();
   }
-}
-
-function moveComponent(component, dx, dy) {
-  component.x += dx;
-  component.y += dy;
-
-  for (let seg of component.segments) {
-    seg.x1 += dx;
-    seg.y1 += dy;
-    seg.x2 += dx;
-    seg.y2 += dy;
-  }
-}
-
-function isInsideComponent(px, py, component) {
-  return (
-    px > component.x &&
-    px < component.x + component.w &&
-    py > component.y &&
-    py < component.y + component.h
-  );
-}
-
-function isInsideWorkspace(px, py) {
-  return (
-    px > workspaceX &&
-    px < workspaceX + workspaceW &&
-    py > workspaceY &&
-    py < workspaceY + workspaceH
-  );
-}
-
-function isInsideCircle(px, py, cx, cy, r) {
-  let dx = px - cx;
-  let dy = py - cy;
-
-  return dx * dx + dy * dy < r * r;
 }
