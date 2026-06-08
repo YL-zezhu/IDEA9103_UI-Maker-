@@ -1,3 +1,21 @@
+// timebase
+let timeState = {
+  currentStage: 1,       
+  corruption: 0,         
+  elapsedMs: 0,          
+  glitchesEnabled: false
+};
+     
+let placedComponents = [];
+
+const STAGE_DURATION_MS = 60000; 
+const STAGE_FLOOR_MS    = 35000; 
+const MAX_SPEED = STAGE_DURATION_MS / STAGE_FLOOR_MS; 
+const COMPONENT_THRESHOLD = 6; //start speed up count
+const SPEED_PER_COMPONENT = 0.07; 
+
+let virtualElapsedMs = 0;
+
 //UI
 let outerSegments;
 let panelSegments;
@@ -137,6 +155,9 @@ function bgmPlay() {
 function draw() {
   background(245);
 
+  updateTime();
+  updateStage2Glitches(); 
+  
   fft.analyze();
   let bass = fft.getEnergy(60, 150);
   let mid = fft.getEnergy("mid");
@@ -162,8 +183,18 @@ function draw() {
   
 
   for (let comp of placedComponents) {
+    push();
+    translate(comp._shakeX || 0, comp._shakeY || 0);
+    if (comp._blur && comp._blur > 0.01) { 
+      drawingContext.filter = 'blur(' + comp._blur + 'px)';
+    }
+    comp.display(true);
     glitchComponent(comp);
+    drawingContext.filter = 'none';
+    pop();
   }
+  
+  drawDebugHUD();
 
   fill(120);
   textAlign(LEFT, TOP);
@@ -182,6 +213,7 @@ function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   createInterfaceSegments();
   createPaletteComponents();
+  if (typeof resizeCorruption === 'function') resizeCorruption();
 }
 
 function switchBGM(index) {
@@ -770,4 +802,50 @@ function computeAllShakes() {
     comp.shakeX = random(-bassShake, bassShake);
     comp.shakeY = random(-bassShake, bassShake);
   }
+}
+
+function updateTime() {
+  let extra = max(0, placedComponents.length - COMPONENT_THRESHOLD);
+  let speed = constrain(1 + extra * SPEED_PER_COMPONENT, 1, MAX_SPEED);
+
+  virtualElapsedMs += deltaTime * speed;
+
+  let stage = constrain(floor(virtualElapsedMs / STAGE_DURATION_MS) + 1, 1, 4);
+
+  let corr = constrain(
+    map(virtualElapsedMs, STAGE_DURATION_MS * 2, STAGE_DURATION_MS * 4, 0, 1),
+    0, 1
+  );
+
+  timeState.currentStage    = stage;
+  timeState.elapsedMs       = round(virtualElapsedMs);
+  timeState.corruption      = corr;
+  timeState.glitchesEnabled = (stage >= 3);
+
+  corruption = timeState.corruption;
+}
+
+function drawDebugHUD() {
+  push(); 
+  resetMatrix();
+  drawingContext.filter = 'none';
+
+  noStroke(); 
+  fill(0, 180);
+  rect(0, 0, 230, 72);
+  fill(255); 
+  textAlign(LEFT, TOP); 
+  textSize(14);
+  text('Stage: ' + timeState.currentStage, 12, 10);
+  text('Time: ' + (timeState.elapsedMs / 1000).toFixed(1) + ' s', 12, 32);
+  text('corruption: ' + timeState.corruption.toFixed(2), 12, 54);
+  text('Components: ' + placedComponents.length, 12, 72);
+  pop();
+}
+
+function keyPressed() {
+  if (key === '1') virtualElapsedMs = STAGE_DURATION_MS * 0;
+  if (key === '2') virtualElapsedMs = STAGE_DURATION_MS * 1;
+  if (key === '3') virtualElapsedMs = STAGE_DURATION_MS * 2;
+  if (key === '4') virtualElapsedMs = STAGE_DURATION_MS * 3;
 }
