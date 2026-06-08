@@ -28,11 +28,32 @@ let trashX;
 let trashY;
 let trashR;
 
+let bgmX;
+let bgmY;
+let bgmW;
+let bgmH;
+
+let bgmDropdown;
+let bgmDropdownOpen = false;
+
+let bgmOptions = [
+  "bgm1",
+  "bgm2",
+  "bgm3",
+  "bonus"
+];
+
+let selectedBgmIndex = 0;
+
+
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   createInterfaceSegments();
   createPaletteComponents();
 }
+
+
 
 function draw() {
   background(245);
@@ -47,7 +68,16 @@ function draw() {
   drawPaletteComponents();
 
   drawDraggingComponent();
+
+  if (bgmDropdownOpen) {
+    drawBgmDropdown(
+      bgmDropdown,
+      selectedBgmIndex
+    );
+  }
 }
+
+
 
 function createInterfaceSegments() {
   let roughnessLarge = 0.8;
@@ -65,6 +95,11 @@ function createInterfaceSegments() {
   trashX = width * 0.94;
   trashY = height * 0.10;
   trashR = width * 0.0275;
+
+  bgmX = width * 0.64;
+  bgmY = height * 0.075;
+  bgmW = width * 0.18;
+  bgmH = height * 0.055;
 
   outerSegments = createSketchRect(
     width * 0.02,
@@ -103,14 +138,26 @@ function createInterfaceSegments() {
   );
 
   bgmSegments = createSketchRect(
-    width * 0.64,
-    height * 0.075,
-    width * 0.18,
-    height * 0.055,
+    bgmX,
+    bgmY,
+    bgmW,
+    bgmH,
     width * 0.015,
     roughnessSmall
   );
+
+  bgmDropdown = createBgmDropdown(
+    bgmX,
+    bgmY + bgmH + height * 0.01,
+    bgmW,
+    bgmH * 0.85,
+    bgmOptions,
+    width * 0.012,
+    1
+  );
 }
+
+
 
 function createPaletteComponents() {
   paletteComponents = [];
@@ -140,8 +187,7 @@ function createPaletteComponents() {
       currentY,
       componentW,
       backgroundH,
-      "backgroundImage",
-      "background"
+      "backgroundImage"
     )
   );
 
@@ -153,7 +199,6 @@ function createPaletteComponents() {
       currentY,
       imageW,
       imageH,
-      "image",
       "image"
     )
   );
@@ -166,7 +211,6 @@ function createPaletteComponents() {
       currentY,
       componentW,
       searchH,
-      "search",
       "search"
     )
   );
@@ -179,7 +223,6 @@ function createPaletteComponents() {
       currentY,
       componentW,
       titleH,
-      "title",
       "title"
     )
   );
@@ -192,7 +235,6 @@ function createPaletteComponents() {
       currentY,
       componentW,
       textH,
-      "text",
       "text"
     )
   );
@@ -205,11 +247,12 @@ function createPaletteComponents() {
       currentY,
       cardW,
       cardH,
-      "card",
       "card"
     )
   );
 }
+
+
 
 function drawPaletteComponents() {
   for (let component of paletteComponents) {
@@ -217,11 +260,15 @@ function drawPaletteComponents() {
   }
 }
 
+
+
 function drawPlacedComponents() {
   for (let component of placedComponents) {
     component.display();
   }
 }
+
+
 
 function drawDraggingComponent() {
   if (draggingComponent != null) {
@@ -236,6 +283,8 @@ function drawDraggingComponent() {
     draggingComponent.display();
   }
 }
+
+
 
 function drawInterface() {
   noStroke();
@@ -269,6 +318,7 @@ function drawInterface() {
   stroke(70);
   strokeWeight(3);
   noFill();
+
   ellipse(width * 0.25, height * 0.08, width * 0.025, width * 0.018);
   line(width * 0.25, height * 0.095, width * 0.235, height * 0.18);
   line(width * 0.25, height * 0.095, width * 0.265, height * 0.18);
@@ -277,23 +327,69 @@ function drawInterface() {
   noStroke();
   fill(70);
   textAlign(LEFT, CENTER);
-  textSize(width * 0.018);
-  text("bgm", width * 0.655, height * 0.103);
+  textSize(width * 0.014);
+
+  text(
+    bgmOptions[selectedBgmIndex],
+    bgmX + bgmW * 0.08,
+    bgmY + bgmH / 2
+  );
 
   stroke(70);
   strokeWeight(3);
-  line(width * 0.80, height * 0.095, width * 0.805, height * 0.105);
-  line(width * 0.81, height * 0.095, width * 0.805, height * 0.105);
+
+  line(
+    bgmX + bgmW * 0.86,
+    bgmY + bgmH * 0.38,
+    bgmX + bgmW * 0.90,
+    bgmY + bgmH * 0.62
+  );
+
+  line(
+    bgmX + bgmW * 0.94,
+    bgmY + bgmH * 0.38,
+    bgmX + bgmW * 0.90,
+    bgmY + bgmH * 0.62
+  );
 
   noFill();
   stroke(70);
   strokeWeight(3);
-  drawSketchCircle(refreshX, refreshY, refreshR, 2, 10);
 
+  drawSketchCircle(refreshX, refreshY, refreshR, 2, 10);
   drawSketchCircle(trashX, trashY, trashR, 2, 20);
 }
 
+
+
 function mousePressed() {
+  if (
+    mouseX > bgmX &&
+    mouseX < bgmX + bgmW &&
+    mouseY > bgmY &&
+    mouseY < bgmY + bgmH
+  ) {
+    bgmDropdownOpen = !bgmDropdownOpen;
+    return;
+  }
+
+  if (bgmDropdownOpen) {
+    let clickedOption = getBgmOptionIndex(
+      mouseX,
+      mouseY,
+      bgmDropdown
+    );
+
+    if (clickedOption >= 0) {
+      selectedBgmIndex = clickedOption;
+      bgmDropdownOpen = false;
+      return;
+    }
+
+    bgmDropdownOpen = false;
+    return;
+  }
+
   if (isInsideCircle(mouseX, mouseY, refreshX, refreshY, refreshR)) {
     fakeRefresh();
     return;
@@ -315,14 +411,15 @@ function mousePressed() {
         mouseY - size.h / 2,
         size.w,
         size.h,
-        component.type,
-        component.label
+        component.type
       );
 
       return;
     }
   }
 }
+
+
 
 function mouseReleased() {
   if (draggingComponent != null) {
@@ -333,6 +430,8 @@ function mouseReleased() {
     draggingComponent = null;
   }
 }
+
+
 
 function getWorkspaceComponentSize(type) {
   if (type == "backgroundImage") {
@@ -377,6 +476,8 @@ function getWorkspaceComponentSize(type) {
   };
 }
 
+
+
 function checkOverload() {
   if (placedComponents.length > 10 && !systemOverloaded) {
     systemOverloaded = true;
@@ -408,6 +509,8 @@ function checkOverload() {
   }
 }
 
+
+
 function fakeRefresh() {
   refreshCount++;
 
@@ -422,6 +525,8 @@ function fakeRefresh() {
   systemOverloaded = false;
   flyingComponentIndex = -1;
 }
+
+
 
 function copyComponentAsTrace(component) {
   let copiedSegments = [];
@@ -441,10 +546,11 @@ function copyComponentAsTrace(component) {
     w: component.w,
     h: component.h,
     type: component.type,
-    label: component.label,
     segments: copiedSegments
   };
 }
+
+
 
 function drawTraces() {
   for (let trace of traces) {
@@ -469,6 +575,8 @@ function drawTraces() {
   }
 }
 
+
+
 function moveComponent(component, dx, dy) {
   component.x += dx;
   component.y += dy;
@@ -481,6 +589,8 @@ function moveComponent(component, dx, dy) {
   }
 }
 
+
+
 function isInsideComponent(px, py, component) {
   return (
     px > component.x &&
@@ -489,6 +599,8 @@ function isInsideComponent(px, py, component) {
     py < component.y + component.h
   );
 }
+
+
 
 function isInsideWorkspace(px, py) {
   return (
@@ -499,12 +611,16 @@ function isInsideWorkspace(px, py) {
   );
 }
 
+
+
 function isInsideCircle(px, py, cx, cy, r) {
   let dx = px - cx;
   let dy = py - cy;
 
   return dx * dx + dy * dy < r * r;
 }
+
+
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);

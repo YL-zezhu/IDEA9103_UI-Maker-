@@ -147,16 +147,116 @@ function drawSegments(segments) {
 
 }
 
+function createBgmDropdown(
+  x,
+  y,
+  w,
+  rowH,
+  options,
+  segmentLength,
+  roughness
+) {
+  let dropdown = {
+    x: x,
+    y: y,
+    w: w,
+    rowH: rowH,
+    h: rowH * options.length,
+    options: options,
+    outerSegments: [],
+    dividerSegments: []
+  };
+
+  dropdown.outerSegments = createSketchRect(
+    x,
+    y,
+    w,
+    dropdown.h,
+    segmentLength,
+    roughness
+  );
+
+  for (let i = 1; i < options.length; i++) {
+    let dividerY = y + rowH * i;
+
+    let divider = createSegmentLine(
+      x,
+      dividerY,
+      x + w,
+      dividerY,
+      segmentLength,
+      roughness
+    );
+
+    dropdown.dividerSegments = dropdown.dividerSegments.concat(divider);
+  }
+
+  return dropdown;
+}
+
+
+function drawBgmDropdown(dropdown, selectedIndex) {
+  noStroke();
+  fill(245);
+  rect(
+    dropdown.x,
+    dropdown.y,
+    dropdown.w,
+    dropdown.h
+  );
+
+  stroke(70);
+  strokeWeight(3);
+  drawSegments(dropdown.outerSegments);
+
+  stroke(70);
+  strokeWeight(2);
+  drawSegments(dropdown.dividerSegments);
+
+  noStroke();
+  fill(70);
+  textAlign(LEFT, CENTER);
+  textSize(width * 0.012);
+
+  for (let i = 0; i < dropdown.options.length; i++) {
+    let optionY = dropdown.y + dropdown.rowH * i + dropdown.rowH / 2;
+
+    let prefix = "";
+
+    if (i == selectedIndex) {
+      prefix = "> ";
+    }
+
+    text(
+      prefix + dropdown.options[i],
+      dropdown.x + dropdown.w * 0.08,
+      optionY
+    );
+  }
+}
+
+
+function getBgmOptionIndex(px, py, dropdown) {
+  if (
+    px > dropdown.x &&
+    px < dropdown.x + dropdown.w &&
+    py > dropdown.y &&
+    py < dropdown.y + dropdown.h
+  ) {
+    return Math.floor((py - dropdown.y) / dropdown.rowH);
+  }
+
+  return -1;
+}
 
 class Component {
-  constructor(x, y, w, h, type, label) {
+  constructor(x, y, w, h, type) {
     this.x = x;
     this.y = y;
     this.w = w;
     this.h = h;
 
     this.type = type;
-    this.label = label;
 
     this.segmentLength = width * 0.015;
     this.roughness = 2;
