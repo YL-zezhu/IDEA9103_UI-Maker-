@@ -33,6 +33,7 @@ function draw() {
       drawComponentClean(c); 
     }
   }
+  if (typeof drawCorruption === 'function') drawCorruption();
 
   drawDebugHUD();
 }
@@ -84,12 +85,16 @@ function drawComponentClean(c) {
 }
 
 function drawDebugHUD() {
-  push(); resetMatrix();
+  push(); 
+  resetMatrix();
   drawingContext.filter = 'none';
 
-  noStroke(); fill(0, 180);
+  noStroke(); 
+  fill(0, 180);
   rect(0, 0, 230, 72);
-  fill(255); textAlign(LEFT, TOP); textSize(14);
+  fill(255); 
+  textAlign(LEFT, TOP); 
+  textSize(14);
   text('Stage: ' + timeState.currentStage, 12, 10);
   text('Time: ' + (timeState.elapsedMs / 1000).toFixed(1) + ' s', 12, 32);
   text('corruption: ' + timeState.corruption.toFixed(2), 12, 54);
@@ -106,5 +111,6 @@ function keyPressed() {
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  if (typeof resizeCorruption === 'function') resizeCorruption();
 }
 
