@@ -192,6 +192,11 @@ function draw() {
     pop();
   }
   
+  // Draw the independent corruption layer
+  if (typeof drawCorruption === 'function') {
+  drawCorruption();
+  }
+
   drawDebugHUD();
 
   fill(120);
@@ -518,17 +523,6 @@ function drawTraces() {
     for (let seg of trace.segments) {
       line(seg.x1, seg.y1, seg.x2, seg.y2);
     }
-
-    noStroke();
-    fill(80, 80, 80, 35);
-    textSize(width * 0.012);
-    textAlign(CENTER, CENTER);
-
-    text(
-      trace.type,
-      trace.x + trace.w / 2,
-      trace.y + trace.h / 2
-    );
   }
 }
 
@@ -681,9 +675,6 @@ function getWorkspaceComponentSize(type) {
 
 
 
-
-
-
 function fakeRefresh() {
   refreshCount++;
 
@@ -691,6 +682,10 @@ function fakeRefresh() {
     for (let component of placedComponents) {
       traces.push(copyComponentAsTrace(component));
     }
+  }
+
+  if (typeof fadeCorruptionLayer === 'function') {
+    fadeCorruptionLayer();
   }
 
   placedComponents = [];
