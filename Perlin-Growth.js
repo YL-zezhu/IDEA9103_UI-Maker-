@@ -90,16 +90,16 @@ function growDiffusion() {
       };
 
       // Modify the radius using Perlin noise for random variation while scaling up with overall progress
-      let n = noise(p.x * 0.02, p.y * 0.02, frameCount * 0.003);
-      let r = growR * (0.25 + n * 0.8);
+      let n = noise(p.x * 0.02, p.y * 0.02, frameCount * 0.002);
+      let r = growR * (0.2 + n * 0.4);
 
       // Draw three layers of circles to create a glow effect. Without a clip mask, circles naturally overlap the edges.
       g.fill(dotBleed(8));
-      g.circle(p.x, p.y, r * 1.6);
-      g.fill(dotBody(38));
       g.circle(p.x, p.y, r * 1.1);
+      g.fill(dotBody(38));
+      g.circle(p.x, p.y, r * 0.5);
       g.fill(dotCore(70));
-      g.circle(p.x, p.y, r * 0.35);
+      g.circle(p.x, p.y, r * 0.2);
     }
   }
 }
