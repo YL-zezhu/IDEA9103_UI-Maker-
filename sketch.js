@@ -101,7 +101,7 @@ let currentSongIndex = 0;
 let songSettings = [    // each song has its own settings for best visual experience
   { bassMin: 150, midMin: 75, trebleMin: 50, bassMax: 240, midMax: 170, trebleMax: 150, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
   { bassMin: 150, midMin: 110, trebleMin: 25, bassMax: 255, midMax: 170, trebleMax: 60, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
-  { bassMin: 200, midMin: 30, trebleMin: 0, bassMax: 255, midMax: 80, trebleMax: 255, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 0.2},
+  { bassMin: 200, midMin: 90, trebleMin: 5, bassMax: 255, midMax: 160, trebleMax: 30, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 0.2},
   { bassMin: 210, midMin: 120, trebleMin: 100, bassMax: 255, midMax: 230, trebleMax: 160, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
 ];
 
@@ -116,8 +116,8 @@ let galleryStarted = false;
 let typewriterProgress = 0;
 const TYPEWRITER_SPEED = 0.5;
 const startScreenText = 
-  "We lost our last designer.\n" +
-  "Could you finish the gallery's\nofficial website for us?\n" +
+  "Oh no! We lost our last designer.\n" +
+  "Could you please finish the gallery's\nofficial website for us?\n" +
   "If you're willing, click anywhere to begin.";
 
 let curatorTileJitters = [];
@@ -135,7 +135,7 @@ function preload() {
   //preload songs
   song[0] = loadSound("Assets/songs/塞壬唱片-MSR,Elvin Shen - Visage.mp3");
   song[1] = loadSound("Assets/songs/The Caretaker - We don't have many days.mp3");
-  song[2] = loadSound("Assets/songs/Brian Eno - Music for Airports.mp3");
+  song[2] = loadSound("Assets/songs/塞壬唱片-MSR,PMP - 光影.mp3");
   song[3] = loadSound("Assets/songs/Victor Borba - Bury the Light.mp3");
 
   //preload all UI images
