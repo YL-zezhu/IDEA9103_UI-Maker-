@@ -25,6 +25,7 @@ function glitchComponent(component) {
   }
 }
 
+// text glitch effect
 function glitchTextOnly(component, bass_x_offset, bass_y_offset, mid, treble){
   let x = component.x + bass_x_offset;
   let y = component.y + bass_y_offset;
@@ -99,6 +100,7 @@ function glitchTextOnly(component, bass_x_offset, bass_y_offset, mid, treble){
 
 }
 
+// frame glitch effect
 function glitchFramedComponent(component, bass_x_offset, bass_y_offset, mid, treble){
   // shaking effect
   let x = component.x + bass_x_offset;   
