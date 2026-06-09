@@ -91,7 +91,7 @@ let smoothBass = 0, smoothMid = 0, smoothTreble = 0;
 
 let playButton;
 let currentSongIndex = 0;
-let songSettings = [
+let songSettings = [    // each song has its own settings for best visual experience
   { bassMin: 150, midMin: 75, trebleMin: 50, bassMax: 240, midMax: 170, trebleMax: 150, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
   { bassMin: 150, midMin: 110, trebleMin: 25, bassMax: 255, midMax: 170, trebleMax: 60, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 1},
   { bassMin: 200, midMin: 30, trebleMin: 0, bassMax: 255, midMax: 80, trebleMax: 255, bassRange: 1, midRange: 0.4, trebleRange: 6 , smoothB: 0.8, smoothM: 0.6, smoothT: 0.2},
@@ -101,11 +101,39 @@ let songSettings = [
 let currentSettings = songSettings[0];
 let bgmStarted = false;
 
+// start screen (advised by Claude)
+let curatorImg;
+let galleryStarted = false;
+
+//typer
+let typewriterProgress = 0;
+const TYPEWRITER_SPEED = 0.5;
+const startScreenText = 
+  "We lost our last designer.\n" +
+  "Could you finish the gallery's\nofficial website for us?\n" +
+  "If you're willing, click anywhere to begin.";
+
+let curatorTileJitters = [];
+let curatorJitterFrame = 0;
+const GRID_COLS = 12;
+const GRID_ROWS = 18;
+
+let startScreenReady = false;
+let skipTypewriter = false;
+
+let handFont;
+let typewriterFont;
+
 function preload() {
+  // load bgms
   song[0] = loadSound("Assets/songs/塞壬唱片-MSR,Elvin Shen - Visage.mp3");
   song[1] = loadSound("Assets/songs/The Caretaker - We don't have many days.mp3");
   song[2] = loadSound("Assets/songs/Brian Eno - Music for Airports.mp3");
   song[3] = loadSound("Assets/songs/Victor Borba - Bury the Light.mp3");
+
+  curatorImg = loadImage("Assets/images/curator.png");
+  //handFont = loadFont("Assets/fonts/PatrickHand-Regular.ttf");
+  typewriterFont = loadFont("Assets/fonts/SpecialElite-Regular.ttf");
 }
 
 function setup() {
@@ -118,6 +146,7 @@ function setup() {
   createInterfaceSegments();
   createPaletteComponents();
 
+  // testing button
   playButton = createButton('Play');
   playButton.position(20, 20);
   playButton.mousePressed(bgmPlay);
@@ -141,6 +170,7 @@ function setup() {
   btn4.mousePressed(() => switchBGM(3));
 }
 
+// loop function
 function bgmPlay() {
   if (!song[currentSongIndex].isPlaying()) {
     song[currentSongIndex].loop();
@@ -152,6 +182,11 @@ function bgmPlay() {
 }
 
 function draw() {
+  if (!galleryStarted) {
+    drawStartScreen();
+    return;
+  }
+
   background(245);
 
   updateTime();
@@ -178,8 +213,6 @@ function draw() {
     drawBgmDropdown(bgmDropdown, selectedBgmIndex);
   }
 
-  
-
   for (let comp of placedComponents) {
     push();
     translate(comp._shakeX || 0, comp._shakeY || 0);
@@ -194,6 +227,7 @@ function draw() {
   
   drawDebugHUD();
 
+  // testing text for audio part
   fill(120);
   textAlign(LEFT, TOP);
   textSize(13);
@@ -220,9 +254,9 @@ function switchBGM(index) {
     song[currentSongIndex].stop();
   }
   
-  currentSongIndex = index;            // change index
-  fft.setInput(song[index]);           // analysize new song
-  song[index].loop();                  // play new song
+  currentSongIndex = index;                // change index
+  fft.setInput(song[index]);               // analysize new song
+  song[index].loop();                      // play new song
   currentSettings = songSettings[index];   // change new song settings
   
   playButton.html('Pause');
@@ -462,7 +496,7 @@ function drawInterface() {
 
   textAlign(CENTER, CENTER);
   textSize(width * 0.015);
-  text("Design a website for our 美术馆~", width * 0.43, height * 0.12);
+  text("Design a website for our gallery~", width * 0.43, height * 0.12);
 
   stroke(70);
   strokeWeight(3);
@@ -533,7 +567,19 @@ function drawTraces() {
 }
 
 function mousePressed() {
-  startBGMOnFirstInteraction();
+  // click to start
+  if (!galleryStarted) {
+    if (!startScreenReady) return;
+    //skip typing
+    if (typewriterProgress < startScreenText.length) {
+      skipTypewriter = true;
+      return;
+    }
+    galleryStarted = true;
+    startBGMOnFirstInteraction();
+    return;
+  }
+
   if (
     mouseX > bgmX &&
     mouseX < bgmX + bgmW &&
@@ -680,10 +726,6 @@ function getWorkspaceComponentSize(type) {
 }
 
 
-
-
-
-
 function fakeRefresh() {
   refreshCount++;
 
@@ -767,7 +809,7 @@ function isInsideCircle(px, py, cx, cy, r) {
   return dx * dx + dy * dy < r * r;
 }
 
-
+// show the next title/text in the list after placing
 function getNextTitle() {
   let t = titleList[titleIndex];
   titleIndex = (titleIndex + 1) % titleList.length;
@@ -792,6 +834,7 @@ function refreshPaletteText(type) {
   }
 }
 
+// shaking effect (whole component)
 function computeAllShakes() {
   let bass = constrain(map(smoothBass, currentSettings.bassMin, currentSettings.bassMax, 0, currentSettings.bassRange), 0, currentSettings.bassRange);
   let dongcidaci = bass * bass * bass * bass;
@@ -843,6 +886,12 @@ function drawDebugHUD() {
 }
 
 function keyPressed() {
+  if (!galleryStarted) {
+    galleryStarted = true;
+    startBGMOnFirstInteraction();
+    return;
+  }
+
   if (key === '1') virtualElapsedMs = STAGE_DURATION_MS * 0;
   if (key === '2') virtualElapsedMs = STAGE_DURATION_MS * 1;
   if (key === '3') virtualElapsedMs = STAGE_DURATION_MS * 2;
@@ -856,4 +905,142 @@ function startBGMOnFirstInteraction() {
   song[currentSongIndex].loop();
   playButton.html('Pause');
   bgmStarted = true;
+}
+
+// start screen (organized by Claude)
+function drawStartScreen() {
+  background(245);
+  
+  push();
+  textFont(typewriterFont);
+  
+  let curatorW = width * 0.25;
+  let curatorH = curatorW * (curatorImg.height / curatorImg.width);
+  let curatorX = width * 0.1;
+  let curatorY = height / 2 - curatorH / 2;
+  
+  drawCuratorTiled(curatorX, curatorY, curatorW, curatorH);
+  
+  // put talking frame
+  let bubbleX = width * 0.42;
+  let bubbleY = height * 0.32;
+  let bubbleW = width * 0.48;
+  let bubbleH = height * 0.35;
+  
+  noStroke();
+  fill(250);
+  rect(bubbleX, bubbleY, bubbleW, bubbleH);
+  
+  let bubbleSegments = createSketchRect(
+    bubbleX, bubbleY, bubbleW, bubbleH,
+    width * 0.02, 1.5
+  );
+  stroke(30);
+  strokeWeight(3);
+  drawSegments(bubbleSegments);
+  
+  // put talking frame pointer
+  let jitter = 1.5;
+  let triTopX = bubbleX + random(-jitter, jitter);
+  let triTopY = bubbleY + bubbleH * 0.35 + random(-jitter, jitter);
+  let triTipX = bubbleX - bubbleW * 0.04 + random(-jitter, jitter);
+  let triTipY = bubbleY + bubbleH * 0.45 + random(-jitter, jitter);
+  let triBotX = bubbleX + random(-jitter, jitter);
+  let triBotY = bubbleY + bubbleH * 0.5 + random(-jitter, jitter);
+  
+  noStroke();
+  fill(250);
+  triangle(triTopX, triTopY, triTipX, triTipY, triBotX, triBotY);
+  
+  stroke(30);
+  strokeWeight(3);
+  line(triTopX, triTopY, triTipX, triTipY);
+  line(triTipX, triTipY, triBotX, triBotY);
+  
+  // typer and text
+  typewriterProgress = min(typewriterProgress + TYPEWRITER_SPEED, startScreenText.length);
+  if (skipTypewriter) {
+    typewriterProgress = startScreenText.length;
+  } else {
+    typewriterProgress = min(typewriterProgress + TYPEWRITER_SPEED, startScreenText.length);
+  }
+  let visibleText = startScreenText.substring(0, floor(typewriterProgress));
+  let lines = visibleText.split('\n');
+  
+  let textX = bubbleX + bubbleW * 0.06;
+  let textY = bubbleY + bubbleH * 0.15;
+  let lineGap = bubbleH * 0.22;
+  
+  noStroke();
+  textAlign(LEFT, TOP);
+  
+  for (let i = 0; i < lines.length; i++) {
+  if (i === 3) {
+    fill(100);
+    textSize(width * 0.013);
+  } else {
+    fill(30);
+    textSize(width * 0.018);
+  }
+  
+  // type every char
+  let charX = textX;
+  let charY = textY + lineGap * i;
+  
+  for (let ch of lines[i]) {
+    let charJitterX = random(-0.8, 0.8);
+    let charJitterY = random(-0.8, 0.8);
+    text(ch, charX + charJitterX, charY + charJitterY);
+    charX += textWidth(ch);
+  }
+}
+  
+  pop();
+  startScreenReady = true;
+}
+
+// curator shaking
+function drawCuratorTiled(curatorX, curatorY, curatorW, curatorH) {
+  let tileSrcW = curatorImg.width / GRID_COLS;
+  let tileSrcH = curatorImg.height / GRID_ROWS;
+  let tileDestW = curatorW / GRID_COLS;
+  let tileDestH = curatorH / GRID_ROWS;
+  
+  // shake frequency
+  curatorJitterFrame++;
+  if (curatorTileJitters.length === 0 || curatorJitterFrame > 2) {
+    curatorJitterFrame = 0;
+    curatorTileJitters = [];
+    
+    let centerCol = (GRID_COLS - 1) / 2;
+    let centerRow = (GRID_ROWS - 1) / 2;
+    let maxDist = sqrt(centerCol * centerCol + centerRow * centerRow);
+    
+    for (let row = 0; row < GRID_ROWS; row++) {
+      for (let col = 0; col < GRID_COLS; col++) {
+        let dist = sqrt((col - centerCol) * (col - centerCol) + (row - centerRow) * (row - centerRow));
+        let edgeFactor = dist / maxDist;
+        curatorTileJitters.push({
+          x: random(-2.5, 2.5) * edgeFactor,
+          y: random(-2.5, 2.5) * edgeFactor
+        });
+      }
+    }
+  }
+  
+  // draw each part
+  let i = 0;
+  for (let row = 0; row < GRID_ROWS; row++) {
+    for (let col = 0; col < GRID_COLS; col++) {
+      let j = curatorTileJitters[i++];
+      image(
+        curatorImg,
+        curatorX + col * tileDestW + j.x,
+        curatorY + row * tileDestH + j.y,
+        tileDestW, tileDestH,
+        col * tileSrcW, row * tileSrcH,
+        tileSrcW, tileSrcH
+      );
+    }
+  }
 }
