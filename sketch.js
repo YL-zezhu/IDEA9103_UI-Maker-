@@ -83,6 +83,13 @@ let textList = [
 let titleIndex = 0;
 let textIndex = 0;
 
+//UI images
+let exhibitionImgs = [];
+let backgroundImgs = [];
+
+let exhibitionIndex = 0;
+let backgroundIndex = 0;
+
 //audio
 let song = [];
 let fft;
@@ -102,10 +109,20 @@ let currentSettings = songSettings[0];
 let bgmStarted = false;
 
 function preload() {
+  //preload songs
   song[0] = loadSound("Assets/songs/塞壬唱片-MSR,Elvin Shen - Visage.mp3");
   song[1] = loadSound("Assets/songs/The Caretaker - We don't have many days.mp3");
   song[2] = loadSound("Assets/songs/Brian Eno - Music for Airports.mp3");
   song[3] = loadSound("Assets/songs/Victor Borba - Bury the Light.mp3");
+
+  //preload all UI images
+  for (let i = 1; i <= 21; i++) {
+  exhibitionImgs.push(loadImage("assets/images/exhibitions/exhibition" + i + ".png"));
+  }
+  for (let i = 1; i <= 6; i++) {
+  backgroundImgs.push(loadImage("assets/images/background_images/bgi" + i + ".png"));
+  }
+
 }
 
 function setup() {
@@ -409,8 +426,40 @@ function createPaletteComponents() {
 
 
 function drawPaletteComponents() {
+
   for (let component of paletteComponents) {
+
     component.display(false);
+
+    if (component.type === "image") {
+
+      noStroke();
+      fill(30);
+
+      textAlign(CENTER, CENTER);
+      textSize(width * 0.012);
+
+      text(
+        "image",
+        component.x + component.w / 2,
+        component.y + component.h / 2
+      );
+    }
+
+    if (component.type === "backgroundImage") {
+
+      noStroke();
+      fill(30);
+
+      textAlign(CENTER, CENTER);
+      textSize(width * 0.012);
+
+      text(
+        "background image",
+        component.x + component.w / 2,
+        component.y + component.h / 2
+      );
+    }
   }
 }
 
@@ -580,6 +629,18 @@ function mousePressed() {
         component.type,
         component.textContent
       );
+
+      //exhibition images rotation
+      if (draggingComponent.type === "image") {
+        draggingComponent.img = exhibitionImgs[exhibitionIndex];
+        exhibitionIndex = (exhibitionIndex + 1) % exhibitionImgs.length;
+      }
+
+      //background images rotation
+      if (draggingComponent.type === "backgroundImage") {
+        draggingComponent.img = backgroundImgs[backgroundIndex];
+        backgroundIndex = (backgroundIndex + 1) % backgroundImgs.length;
+      }
 
       return;
     }

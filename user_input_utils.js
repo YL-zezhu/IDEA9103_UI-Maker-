@@ -257,6 +257,7 @@ class Component {
     this.h = h;
 
     this.type = type;
+    this.img = null;
 
     this.segmentLength = width * 0.015;
     this.roughness = 2;
@@ -289,40 +290,38 @@ class Component {
 
     if (this.type == "image") {
 
+      let padding = min(this.w, this.h) * 0.08;
+
+      if (this.img) {
+        image(
+          this.img,
+          this.x + padding,
+          this.y + padding,
+          this.w - padding * 2,
+          this.h - padding * 2
+        );
+      }
+
       drawSegments(this.segments);
-
-      noStroke();
-      fill(30);
-
-      textAlign(CENTER, CENTER);
-      textSize(width * 0.012);
-
-      text(
-        "image",
-        this.x + this.w / 2,
-        this.y + this.h / 2
-      );
-
     }
 
     else if (this.type == "backgroundImage") {
 
-      drawSegments(this.segments);
+      let padding = min(this.w, this.h) * 0.05;
 
-      noStroke();
-      fill(30);
-
-      textAlign(CENTER, CENTER);
-      textSize(width * 0.012);
-
-      text(
-        "background image",
-        this.x + this.w / 2,
-        this.y + this.h / 2
+      if (this.img) {
+        image(
+        this.img,
+        this.x + padding,
+        this.y + padding,
+        this.w - padding * 2,
+        this.h - padding * 2
       );
-
     }
 
+      drawSegments(this.segments);
+    }
+    
     else if (this.type == "search") {
 
       drawSegments(this.segments);
