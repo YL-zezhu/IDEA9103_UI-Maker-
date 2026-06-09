@@ -6,8 +6,8 @@ let timeState = {
   glitchesEnabled: false
 };
 //duration of the effect（time-base）
-const STAGE_DURATION_MS = 60000; 
-const STAGE_FLOOR_MS    = 35000; 
+const STAGE_DURATION_MS = 30000; 
+const STAGE_FLOOR_MS    = 15000; 
 const MAX_SPEED = STAGE_DURATION_MS / STAGE_FLOOR_MS; 
 const COMPONENT_THRESHOLD = 6; //start speed up count
 const SPEED_PER_COMPONENT = 0.07; 
@@ -40,10 +40,7 @@ let workspaceH;
 let refreshX;
 let refreshY;
 let refreshR;
-
-let trashX;
-let trashY;
-let trashR;
+let refreshIcon;
 
 let bgmX;
 let bgmY;
@@ -139,7 +136,8 @@ function preload() {
   song[3] = loadSound("Assets/songs/Victor Borba - Bury the Light.mp3");
 
   //preload all UI images
-  for (let i = 1; i <= 21; i++) {
+  refreshIcon = loadImage("assets/images/icon/refresh.png");
+  for (let i = 1; i <= 25; i++) {
   exhibitionImgs.push(loadImage("assets/images/exhibitions/exhibition" + i + ".png"));
   }
   for (let i = 1; i <= 6; i++) {
@@ -147,13 +145,14 @@ function preload() {
   }
 
   curatorImg = loadImage("Assets/images/curator.png");
-  //handFont = loadFont("Assets/fonts/PatrickHand-Regular.ttf");
+  handFont = loadFont("Assets/fonts/SpecialElite-Regular.ttf");
   typewriterFont = loadFont("Assets/fonts/SpecialElite-Regular.ttf");
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   textAlign(CENTER, CENTER);
+  textFont(handFont);
 
   fft = new p5.FFT(0.8, 1024);
   fft.setInput(song[0]);
@@ -558,11 +557,6 @@ function drawInterface() {
   strokeWeight(3);
   noFill();
 
-  ellipse(width * 0.25, height * 0.08, width * 0.025, width * 0.018);
-  line(width * 0.25, height * 0.095, width * 0.235, height * 0.18);
-  line(width * 0.25, height * 0.095, width * 0.265, height * 0.18);
-  line(width * 0.235, height * 0.18, width * 0.265, height * 0.18);
-
   noStroke();
   fill(70);
   textAlign(LEFT, CENTER);
@@ -596,9 +590,22 @@ function drawInterface() {
   strokeWeight(3);
 
   drawSketchCircle(refreshX, refreshY, refreshR, 2, 10);
-  drawSketchCircle(trashX, trashY, trashR, 2, 20);
+
+  if (refreshIcon) {
+    push();
+    imageMode(CENTER);
+    image(
+      refreshIcon,
+      refreshX,
+      refreshY,
+      refreshR * 1.25,
+      refreshR * 1.25
+    );
+    pop();
+  }
 }
 
+//draw the ghost traces of placed components to make them look like not be erased
 function drawTraces() {
   for (let trace of traces) {
     stroke(80, 80, 80, 45);
@@ -655,13 +662,6 @@ function mousePressed() {
 
   if (isInsideCircle(mouseX, mouseY, refreshX, refreshY, refreshR)) {
     fakeRefresh();
-    return;
-  }
-
-  if (isInsideCircle(mouseX, mouseY, trashX, trashY, trashR)) {
-    placedComponents = [];
-    systemOverloaded = false;
-    flyingComponentIndex = -1;
     return;
   }
 

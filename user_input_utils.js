@@ -1,3 +1,9 @@
+// This file contains functions and classes for generating
+// sketch-style interface components and supporting user interaction.
+
+
+//These two functions is for creating sketch-style rectangles
+//step1: separate a length into some segments and give them random offset 
 function createSegmentLine(
   x1,
   y1,
@@ -56,7 +62,7 @@ function createSegmentLine(
 }
 
 
-
+//step2: use step1 to create a sketch-style rectangle
 function createSketchRect(
   x,
   y,
@@ -104,6 +110,7 @@ function createSketchRect(
     roughness
   );
 
+//I used ChatGPT to learn the array concatenation function.
   result = result.concat(top);
   result = result.concat(bottom);
   result = result.concat(left);
@@ -112,9 +119,12 @@ function createSketchRect(
   return result;
 }
 
+//This function creates a sketch-style circle by using Perlin noise to generate irregular edges.
 function drawSketchCircle(cx, cy, r, roughness) {
   noFill();
+  //I used ChatGPT to learn beginShape() and endShape() to create a closed shape
   beginShape();
+  
 
   for (let angle = 0; angle < TWO_PI; angle += 0.25) {
     let offset = noise(angle * 2) * roughness * 2 - roughness;
@@ -128,6 +138,7 @@ function drawSketchCircle(cx, cy, r, roughness) {
 
   endShape(CLOSE);
 }
+
 
 function drawSegments(segments) {
 
@@ -147,6 +158,7 @@ function drawSegments(segments) {
 
 }
 
+//create the selection bar of bgm
 function createBgmDropdown(
   x,
   y,
@@ -235,8 +247,10 @@ function drawBgmDropdown(dropdown, selectedIndex) {
   }
 }
 
-
+//change bgm by user mouse input
 function getBgmOptionIndex(px, py, dropdown) {
+  // Check if the mouse position is inside the dropdown area
+  // I used chatGPT to explain how && is used to check multiple conditions
   if (
     px > dropdown.x &&
     px < dropdown.x + dropdown.w &&
@@ -249,6 +263,8 @@ function getBgmOptionIndex(px, py, dropdown) {
   return -1;
 }
 
+
+// This class is for storing and displaying UI elements
 class Component {
   constructor(x, y, w, h, type, textContent = null) {
     this.x = x;
@@ -321,7 +337,7 @@ class Component {
 
       drawSegments(this.segments);
     }
-    
+
     else if (this.type == "search") {
 
       drawSegments(this.segments);
